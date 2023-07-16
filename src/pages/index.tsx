@@ -3,11 +3,14 @@ import Head from "next/head";
 import Link from "next/link";
 import { api } from "@/utils/api";
 import { Button } from "@/components/ui/Button";
+import { Navbar } from "@/components/Navbar";
 
 export default function Home() {
   return (
-    <div className="flex justify-center pt-5">
-      <Button>test</Button>
+    <div >
+      <div className="flex justify-center">
+        <Navbar />
+      </div>
     </div>
   );
 }
