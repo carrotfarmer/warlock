@@ -1,21 +1,34 @@
 import React from "react";
+
 import { Button } from "./ui/Button";
 
+import { useSession, signIn, signOut } from "next-auth/react";
+
 export const Navbar = ({}) => {
+  const { data: session } = useSession();
+
   return (
-    <div className="flex justify-between w-full p-4">
+    <div className="flex w-full justify-between p-4">
       <div className="flex items-center">
-        <h1 className="text-2xl font-extrabold">warlock.</h1>
+        <h1 className="text-2xl font-extrabold text-purple-200">warlock.</h1>
       </div>
       <div className="flex items-center">
-        <Button
-          className="text-sm font-semibold text-white bg-purple-500 border-none rounded-md hover:bg-purple-600"
-          onClick={() => {}}
-        >
-          sign in
-        </Button>
+        {session ? (
+          <Button
+            className="rounded-md border-none bg-purple-500 text-sm font-semibold text-white hover:bg-purple-600"
+            onClick={() => void signOut()}
+          >
+            sign out
+          </Button>
+        ) : (
+          <Button
+            className="rounded-md border-none bg-purple-500 text-sm font-semibold text-white hover:bg-purple-600"
+            onClick={() => void signIn()}
+          >
+            sign in
+          </Button>
+        )}
       </div>
     </div>
   );
 };
-
