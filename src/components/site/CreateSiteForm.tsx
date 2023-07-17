@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +16,13 @@ interface CreateSiteFormProps {
 }
 
 export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
-  const { mutate: createSite, isLoading } = api.site.createSite.useMutation();
+  const router = useRouter();
+
+  const { mutate: createSite, isLoading } = api.site.createSite.useMutation({
+    onSuccess: (data) => {
+      router.push(`/${data.id}`);
+    }
+  });
 
   const {
     register,
@@ -27,7 +34,6 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
   });
 
   const onSubmit = (data: CreateSiteFormData) => {
-    console.log("called")
     createSite({ encryptionKeyHint: data.encryptionKeyHint, name: data.name });
     reset();
   };
@@ -71,7 +77,7 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
             </div>
 
             <div className="flex justify-center pt-3">
-              <Button size="lg" type="submit">
+              <Button size="lg" type="submit" isLoading={isLoading}>
                 create site
               </Button>
             </div>

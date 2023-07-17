@@ -3,14 +3,17 @@ import React from "react";
 import { Button } from "./ui/Button";
 
 import { useSession, signIn, signOut } from "next-auth/react";
+import Link from "next/link";
 
 export const Navbar = ({}) => {
   const { data: session } = useSession();
 
   return (
-    <div className="flex w-full justify-between p-4 border-b border-slate-800 shadow-lg">
+    <div className="flex w-full justify-between border-b border-slate-800 p-4 shadow-lg">
       <div className="flex items-center">
-        <h1 className="text-2xl font-extrabold text-purple-200">warlock.</h1>
+        <Link href="/">
+          <h1 className="text-2xl font-extrabold text-purple-200">warlock.</h1>
+        </Link>
       </div>
       <div className="flex items-center">
         {session ? (

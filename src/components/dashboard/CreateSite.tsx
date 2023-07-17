@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "../ui/Button";
 
+// eslint-disable-next-line
 interface CreateSiteProps {}
 
 export const CreateSite: React.FC<CreateSiteProps> = ({}) => {
