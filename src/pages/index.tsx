@@ -17,7 +17,7 @@ export default function Home() {
       </div>
       {/* a div aligned to the left for the dashboard */}
       {sessionData?.user ? (
-        <div className="flex justify-start pl-5">
+        <div className="flex justify-start pl-16">
           <Dashboard userId={sessionData.user.id} />
         </div>
       ) : (
