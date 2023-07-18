@@ -7,6 +7,8 @@ import { buttonVariants } from "@/components/ui/Button";
 
 import { cn } from "@/lib/utils";
 
+import { signIn } from "next-auth/react";
+
 const SignUpPage = () => {
   return (
     <>
@@ -18,7 +20,12 @@ const SignUpPage = () => {
         <p className="text-gray-300 font-bold text-lg">ready to get started?</p>
       </div>
       <div className="flex justify-center pt-5">
-        <button className={cn(buttonVariants({ variant: "outline" }), "w-56 h-12 gap-2 text-sm")}>
+        <button className={cn(buttonVariants({ variant: "outline" }), "w-56 h-12 gap-2 text-sm")}
+          // eslint-disable-next-line
+          onClick={() => signIn("google", {
+            callbackUrl: "/"
+          })}
+        >
           sign up with<Icons.google className="w-5 h-5" />
         </button>
       </div>

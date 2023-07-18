@@ -15,7 +15,6 @@ export default function Home() {
       <div className="flex justify-center">
         <Navbar />
       </div>
-      {/* a div aligned to the left for the dashboard */}
       {sessionData?.user ? (
         <div className="flex justify-start pl-16">
           <Dashboard userId={sessionData.user.id} />
