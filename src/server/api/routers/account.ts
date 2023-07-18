@@ -15,7 +15,7 @@ export const accountRouter = createTRPCRouter({
         email: email,
         siteId: input.siteId,
         // TODO: encrypt password
-        encryptedPassword: input.password,
+        encryptedPassword: input.encryptedPassword,
       },
     })
   }),

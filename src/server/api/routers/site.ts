@@ -42,4 +42,21 @@ export const siteRouter = createTRPCRouter({
         },
       });
     }),
+
+  getEncryptionKeyHint: protectedProcedure
+    .input(
+      z.object({
+        siteId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.site.findUnique({
+        where: {
+          id: input.siteId,
+        },
+        select: {
+          encryptionKeyHint: true,
+        },
+      });
+    }),
 });

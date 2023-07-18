@@ -10,6 +10,9 @@ import { Label } from "../ui/Label";
 import { Button } from "../ui/Button";
 import { api } from "@/utils/api";
 import { type AccountFormData, AccountValidator } from "@/lib/validators/account";
+import { EncryptionKeyHint } from "../site/EncryptionKeyHint";
+
+import { encrypt, hash } from "@/lib/utils";
 
 interface CreateAccountFormProps {
   siteId: string;
@@ -33,8 +36,11 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
     resolver: zodResolver(AccountValidator),
   });
 
-  const onSubmit = (data: AccountFormData) => {
-    createAccount({ siteId, password: data.password, email: data.email })
+  const onSubmit = async (data: AccountFormData): Promise<void> => {
+    const hashedEncryptionKey = await hash(data.encryptionKey) 
+    const encryptedPassword = encrypt(data.password, hashedEncryptionKey);
+
+    createAccount({ siteId, encryptedPassword, email: data.email })
     reset();
   };
 
@@ -71,6 +77,25 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
               <p className="pt-2 text-xs text-gray-500">
                 this password will be encrypted using this site&apos;s encryption key. 
               </p>
+            </div>
+
+            <div className="pt-3">
+              <Label>encryption key</Label>
+              <Input
+                {...register("encryptionKey")}
+                type="password"
+              />
+              {errors.encryptionKey && (
+                <p className="pt-2 text-xs text-red-500">
+                  {errors.encryptionKey.message}
+                </p>
+              )}
+              <p className="pt-2 text-xs text-gray-500">
+                make sure the encryption key is the same as the one you used to create this site, matching the hint you provided.
+                if not, you will not be able to decrypt the password.
+              </p>
+
+              <EncryptionKeyHint siteId={siteId} />
             </div>
 
             <div className="flex justify-center pt-3">
