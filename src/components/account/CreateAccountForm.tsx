@@ -9,7 +9,7 @@ import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
 import { Button } from "../ui/Button";
 import { api } from "@/utils/api";
-import { AccountRequest, AccountValidator } from "@/lib/validators/account";
+import { type AccountFormData, AccountValidator } from "@/lib/validators/account";
 
 interface CreateAccountFormProps {
   siteId: string;
@@ -18,7 +18,7 @@ interface CreateAccountFormProps {
 export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) => {
   const router = useRouter();
 
-  const { mutate: createSite, isLoading } = api.site.createSite.useMutation({
+  const { mutate: createAccount, isLoading } = api.account.createAccount.useMutation({
     onSuccess: (data) => {
       router.push(`/${siteId}/${data.id}`);
     },
@@ -29,12 +29,12 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<AccountRequest>({
+  } = useForm<AccountFormData>({
     resolver: zodResolver(AccountValidator),
   });
 
-  const onSubmit = (data: AccountRequest) => {
-    // createSite({ encryptionKeyHint: data.encryptionKeyHint, name: data.name });
+  const onSubmit = (data: AccountFormData) => {
+    createAccount({ siteId, password: data.password, email: data.email })
     reset();
   };
 
