@@ -21,7 +21,7 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
   const { mutate: createSite, isLoading } = api.site.createSite.useMutation({
     onSuccess: (data) => {
       router.push(`/${data.id}`);
-    }
+    },
   });
 
   const {
@@ -47,6 +47,8 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
             <div>
               <Label>site name</Label>
               <Input placeholder="eg: twitter" {...register("name")} />
+              {errors.name && <p className="pt-2 text-xs text-red-500">{errors.name.message}</p>}
+
               <p className="pt-2 text-xs text-gray-500">
                 site name is used to identify your site in the dashboard.
                 <br />
@@ -57,6 +59,11 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
             <div className="pt-3">
               <Label>encryption key</Label>
               <Input {...register("encryptionKey")} />
+              {errors.encryptionKey && (
+                <p className="pt-2 text-xs font-bold text-red-500">
+                  {errors.encryptionKey.message}
+                </p>
+              )}
               <p className="pt-2 text-xs text-red-500">
                 NOTE: we do not store your encryption key. if you lose your encryption key, you will
                 not be able to access the data related to this site. please keep your encryption key
@@ -70,6 +77,11 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
                 {...register("encryptionKeyHint")}
                 placeholder="eg: my chemistry teacher's name + my cat's birthday"
               />
+              {errors.encryptionKey && (
+                <p className="pt-2 text-xs text-red-500">
+                  {errors.encryptionKey.message}
+                </p>
+              )}
               <p className="pt-2 text-xs text-gray-500">
                 this hint will be shown to you if you forget your encryption key, please configure a
                 good, memorable hint.
