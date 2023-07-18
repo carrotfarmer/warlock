@@ -1,5 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { SiteValidator } from "@/lib/validators/site";
+import { z } from "zod";
 
 export const siteRouter = createTRPCRouter({
   createSite: protectedProcedure.input(SiteValidator).mutation(async ({ input, ctx }) => {
@@ -20,7 +21,25 @@ export const siteRouter = createTRPCRouter({
       include: {
         user: true,
         accounts: true,
-      }
+      },
     });
   }),
+
+  getSite: protectedProcedure
+    .input(
+      z.object({
+        siteId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.site.findUnique({
+        where: {
+          id: input.siteId,
+        },
+        include: {
+          user: true,
+          accounts: true,
+        },
+      });
+    }),
 });

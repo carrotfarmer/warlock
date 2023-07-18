@@ -77,9 +77,9 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
                 {...register("encryptionKeyHint")}
                 placeholder="eg: my chemistry teacher's name + my cat's birthday"
               />
-              {errors.encryptionKey && (
+              {errors.encryptionKeyHint && (
                 <p className="pt-2 text-xs text-red-500">
-                  {errors.encryptionKey.message}
+                  {errors.encryptionKeyHint.message}
                 </p>
               )}
               <p className="pt-2 text-xs text-gray-500">
