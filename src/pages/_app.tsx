@@ -4,6 +4,7 @@ import { type AppType } from "next/app";
 import { api } from "@/utils/api";
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/Toaster";
 
 import { Inter } from "next/font/google";
 
@@ -18,6 +19,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <SessionProvider session={session}>
         <main className={inter.className}>
           <Component {...pageProps} />
+          <Toaster />
         </main>
       </SessionProvider>
     </ThemeProvider>

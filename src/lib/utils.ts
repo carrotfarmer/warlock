@@ -14,7 +14,7 @@ export const encrypt = (text: string, key: string): string => {
   return aes256.encrypt(key, text)
 }
 
-export const decrypt = async (encryptedText: string, key: string): Promise<string> => {
+export const decrypt = (encryptedText: string, key: string): string => {
   // eslint-disable-next-line
   // @ts-ignore
   // eslint-disable-next-line

@@ -2,7 +2,7 @@ import type { SiteAccount } from "@prisma/client";
 import React, { useState } from "react";
 import { HoverIconButton } from "../HoverIconButton";
 import { Pencil2Icon } from "@radix-ui/react-icons";
-import { EyeIcon } from "lucide-react";
+import { Copy, EyeIcon } from "lucide-react";
 import { decrypt, displayEmail } from "@/lib/utils";
 import {
   Dialog,
@@ -21,6 +21,7 @@ import { Label } from "../ui/Label";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/Button";
+import { useToast } from "@/lib/hooks/use-toast";
 
 interface AccountProps {
   account: SiteAccount;
@@ -42,6 +43,9 @@ type FormData = z.infer<typeof formSchema>;
 export const Account: React.FC<AccountProps> = ({ account }) => {
   const [email, setEmail] = useState<string>(displayEmail(account.email));
   const [password, setPassword] = useState<string>("*************");
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+
+  const [open, setIsOpen] = useState<boolean>(false);
 
   const {
     register,
@@ -52,21 +56,36 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
     resolver: zodResolver(formSchema),
   });
 
+  const { toast } = useToast()
+
   const onSubmit = async (data: FormData) => {
     setEmail(account.email);
 
-    const decryptedPassword = await decrypt(account.encryptedPassword, data.encryptionKey);
+    const decryptedPassword = decrypt(account.encryptedPassword, data.encryptionKey);
+
+    if (decryptedPassword.includes("�")) {
+      reset();
+      setPassword("invalid encryption key")
+      toast({
+        title: "invalid encryption key",
+        description: "the encryption key you entered is invalid. please try again.",
+        variant: "destructive"
+      })
+      return;
+    }
 
     setPassword(decryptedPassword);
+    setIsVisible(true);
+    setIsOpen(false)
     reset();
   };
 
   return (
     <div className="grid grid-cols-4 gap-5 rounded-lg px-20 py-4 hover:bg-gray-900">
-      <p className="text-md font-bold text-purple-300">{email}</p>
-      <p className="pl-10">{password}</p>
+      <p className="text-md pt-1 font-bold text-purple-300">{email}</p>
+      <p className="pl-10 pt-1">{password}</p>
       {account.createdAt !== account.updatedAt ? (
-        <p className="text-gray-500">
+        <p className="pt-1 text-gray-500">
           created on{" "}
           {new Date(account.createdAt).toLocaleDateString("en-US", {
             month: "short",
@@ -74,7 +93,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
           })}
         </p>
       ) : (
-        <p className="text-gray-500">
+        <p className="pt-1 text-gray-500">
           modified on{" "}
           {new Date(account.updatedAt).toLocaleDateString("en-US", {
             month: "short",
@@ -84,7 +103,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
       )}
 
       <div className="grid grid-cols-3 gap-1">
-        <Dialog>
+        <Dialog open={open} onOpenChange={setIsOpen}>
           <DialogTrigger>
             <HoverIconButton tooltipText="view credentials">
               <EyeIcon className="h-4 w-4" />
@@ -119,6 +138,20 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
         <HoverIconButton tooltipText="edit credentials">
           <Pencil2Icon className="h-4 w-4" />
         </HoverIconButton>
+
+        {isVisible && (
+          <HoverIconButton
+            tooltipText="copy password"
+            // eslint-disable-next-line
+            onClick={async () => {
+              await navigator.clipboard.writeText(password);
+              setIsVisible(false);
+              setPassword("*************");
+            }}
+          >
+            <Copy className="h-4 w-4" />
+          </HoverIconButton>
+        )}
       </div>
     </div>
   );
