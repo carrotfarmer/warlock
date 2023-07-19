@@ -12,7 +12,7 @@ import { api } from "@/utils/api";
 import { type AccountFormData, AccountValidator } from "@/lib/validators/account";
 import { EncryptionKeyHint } from "../site/EncryptionKeyHint";
 
-import { encrypt, hash } from "@/lib/utils";
+import { encrypt } from "@/lib/utils";
 
 interface CreateAccountFormProps {
   siteId: string;
@@ -22,8 +22,8 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
   const router = useRouter();
 
   const { mutate: createAccount, isLoading } = api.account.createAccount.useMutation({
-    onSuccess: (data) => {
-      router.push(`/${siteId}/${data.id}`);
+    onSuccess: () => {
+      router.push(`/${siteId}`);
     },
   });
 
@@ -36,9 +36,8 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
     resolver: zodResolver(AccountValidator),
   });
 
-  const onSubmit = async (data: AccountFormData): Promise<void> => {
-    const hashedEncryptionKey = await hash(data.encryptionKey) 
-    const encryptedPassword = encrypt(data.password, hashedEncryptionKey);
+  const onSubmit = (data: AccountFormData) => {
+    const encryptedPassword = encrypt(data.password, data.encryptionKey);
 
     createAccount({ siteId, encryptedPassword, email: data.email })
     reset();

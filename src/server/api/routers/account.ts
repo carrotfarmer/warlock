@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 import { AccountCreationRequestValidator } from "@/lib/validators/account";
+import { z } from "zod";
 
 export const accountRouter = createTRPCRouter({
   createAccount: protectedProcedure.input(AccountCreationRequestValidator).mutation(async ({ input, ctx }) => {
@@ -19,4 +20,16 @@ export const accountRouter = createTRPCRouter({
       },
     })
   }),
+
+  getAccounts: protectedProcedure
+  .input(z.object({
+    siteId: z.string()
+  }))
+  .query(async ({ ctx, input }) => {
+    return await ctx.prisma.siteAccount.findMany({
+      where: {
+        siteId: input.siteId
+      }
+    })
+  })
 })

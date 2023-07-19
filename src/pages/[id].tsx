@@ -11,6 +11,7 @@ import { api } from "@/utils/api";
 import { ChevronLeft, Download, Trash2 } from "lucide-react";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import { CreateAccount } from "@/components/account/CreateAccount";
+import { Account } from "@/components/account/Account";
 
 const SitePage: NextPage = () => {
   const router = useRouter();
@@ -55,8 +56,17 @@ const SitePage: NextPage = () => {
             <div className="flex justify-center">
               <CreateAccount siteId={siteData?.id as string} />
             </div>
+
           </>
         )}
+
+        <div className="flex justify-center px-20">
+          <div className="pt-10">
+              {siteData?.accounts.map((account) => (
+                <Account key={account.id} account={account} />
+              ))}
+            </div>
+        </div>
       </main>
     </>
   );
