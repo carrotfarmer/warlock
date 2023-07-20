@@ -58,7 +58,7 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
                 </p>
               )}
               <p className="pt-2 text-xs text-gray-500">
-                the email is just for your reference. you do not need to include it, if you don&apos;t feel comfortable with it.
+                this email is just for your reference, it will not be used for anything else. 
               </p>
             </div>
 

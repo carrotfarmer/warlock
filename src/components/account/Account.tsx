@@ -1,8 +1,8 @@
 import type { SiteAccount } from "@prisma/client";
 import React, { useState } from "react";
 import { HoverIconButton } from "../HoverIconButton";
-import { Pencil2Icon } from "@radix-ui/react-icons";
-import { Copy, EyeIcon } from "lucide-react";
+import { LockClosedIcon, LockOpen1Icon, Pencil2Icon } from "@radix-ui/react-icons";
+import { Copy, EyeIcon, EyeOff, Trash2 } from "lucide-react";
 import { decrypt, displayEmail } from "@/lib/utils";
 import {
   Dialog,
@@ -56,34 +56,33 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
     resolver: zodResolver(formSchema),
   });
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
-  const onSubmit = async (data: FormData) => {
-    setEmail(account.email);
-
+  const onSubmit = (data: FormData) => {
     const decryptedPassword = decrypt(account.encryptedPassword, data.encryptionKey);
 
     if (decryptedPassword.includes("�")) {
       reset();
-      setPassword("invalid encryption key")
+      setPassword("invalid encryption key");
       toast({
         title: "invalid encryption key",
         description: "the encryption key you entered is invalid. please try again.",
-        variant: "destructive"
-      })
+        variant: "destructive",
+      });
       return;
     }
 
     setPassword(decryptedPassword);
+    setEmail(account.email);
     setIsVisible(true);
-    setIsOpen(false)
+    setIsOpen(false);
     reset();
   };
 
   return (
-    <div className="grid grid-cols-4 gap-5 rounded-lg px-20 py-4 hover:bg-gray-900">
+    <div className="grid grid-cols-4 gap-4 rounded-lg px-20 py-4 hover:bg-gray-900">
       <p className="text-md pt-1 font-bold text-purple-300">{email}</p>
-      <p className="pl-10 pt-1">{password}</p>
+      <p className="flex justify-center pt-1">{password}</p>
       {account.createdAt !== account.updatedAt ? (
         <p className="pt-1 text-gray-500">
           created on{" "}
@@ -103,54 +102,88 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
       )}
 
       <div className="grid grid-cols-3 gap-1">
-        <Dialog open={open} onOpenChange={setIsOpen}>
-          <DialogTrigger>
-            <HoverIconButton tooltipText="view credentials">
-              <EyeIcon className="h-4 w-4" />
-            </HoverIconButton>
-          </DialogTrigger>
-          <DialogContent className={inter.className}>
-            {/* eslint-disable-next-line */}
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <DialogHeader>
-                <DialogTitle>enter encryption key</DialogTitle>
-                <DialogDescription>
-                  <p className="pb-5">
-                    enter this site&apos;s encryption key to view the credentials. if you do not
-                    remember the encryption key you can use the hint given below.
-                  </p>
+        {!isVisible ? (
+          <Dialog open={open} onOpenChange={setIsOpen}>
+            <DialogTrigger>
+              <HoverIconButton tooltipText="unlock credentials">
+                <LockOpen1Icon className="h-4 w-4" />
+              </HoverIconButton>
+            </DialogTrigger>
+            <DialogContent className={inter.className}>
+              {/* eslint-disable-next-line */}
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <DialogHeader>
+                  <DialogTitle>enter encryption key</DialogTitle>
+                  <DialogDescription>
+                    <p className="pb-5">
+                      enter this site&apos;s encryption key to view the credentials. if you do not
+                      remember the encryption key you can use the hint given below.
+                    </p>
 
-                  <Label>encryption key</Label>
-                  <Input {...register("encryptionKey")} />
-                  <p className="pt-1 text-red-500">{errors.encryptionKey?.message}</p>
-                  <EncryptionKeyHint siteId={account.siteId} />
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <div className="pt-5">
-                  <Button type="submit">decrypt password</Button>
-                </div>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <HoverIconButton tooltipText="edit credentials">
-          <Pencil2Icon className="h-4 w-4" />
-        </HoverIconButton>
-
-        {isVisible && (
+                    <Label>encryption key</Label>
+                    <Input {...register("encryptionKey")} />
+                    <p className="pt-1 text-red-500">{errors.encryptionKey?.message}</p>
+                    <EncryptionKeyHint siteId={account.siteId} />
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <div className="pt-5">
+                    <Button type="submit">decrypt password</Button>
+                  </div>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        ) : (
           <HoverIconButton
-            tooltipText="copy password"
-            // eslint-disable-next-line
-            onClick={async () => {
-              await navigator.clipboard.writeText(password);
+            tooltipText="lock credentials"
+            onClick={() => {
               setIsVisible(false);
               setPassword("*************");
+              setEmail(displayEmail(account.email));
             }}
           >
-            <Copy className="h-4 w-4" />
+            <LockClosedIcon className="h-4 w-4" />
           </HoverIconButton>
+        )}
+
+        {isVisible && (
+          <div className="grid grid-cols-3 gap-12">
+            <HoverIconButton tooltipText="edit credentials">
+              <Pencil2Icon className="h-4 w-4" />
+            </HoverIconButton>
+
+            <HoverIconButton
+              tooltipText="copy password"
+              // eslint-disable-next-line
+              onClick={async () => {
+                toast({
+                  title: "copied password",
+                  description: "successfully copied the password to your clipboard",
+                  variant: "default",
+                });
+                await navigator.clipboard.writeText(password);
+                setIsVisible(false);
+                setPassword("*************");
+              }}
+            >
+              <Copy className="h-4 w-4" />
+            </HoverIconButton>
+            <HoverIconButton
+              tooltipText="delete credentials"
+              // eslint-disable-next-line
+              onClick={async () => {
+                toast({
+                  title: "deleted credentials successfully",
+                  variant: "default",
+                });
+                setPassword("*************");
+              }}
+              className="border-red-300 text-red-300 hover:text-red-300"
+            >
+              <Trash2 className="h-4 w-4" />
+            </HoverIconButton>
+          </div>
         )}
       </div>
     </div>

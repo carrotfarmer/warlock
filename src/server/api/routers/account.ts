@@ -4,32 +4,43 @@ import { AccountCreationRequestValidator } from "@/lib/validators/account";
 import { z } from "zod";
 
 export const accountRouter = createTRPCRouter({
-  createAccount: protectedProcedure.input(AccountCreationRequestValidator).mutation(async ({ input, ctx }) => {
-    let email: string = input.email ?? "";
-    
-    if (!email || email.length === 0) {
-      email = "not provided";
-    }
-
-    return await ctx.prisma.siteAccount.create({
-      data: {
-        email: email,
-        siteId: input.siteId,
-        // TODO: encrypt password
-        encryptedPassword: input.encryptedPassword,
-      },
-    })
-  }),
+  createAccount: protectedProcedure
+    .input(AccountCreationRequestValidator)
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.prisma.siteAccount.create({
+        data: {
+          email: input.email,
+          siteId: input.siteId,
+          encryptedPassword: input.encryptedPassword,
+        },
+      });
+    }),
 
   getAccounts: protectedProcedure
-  .input(z.object({
-    siteId: z.string()
-  }))
-  .query(async ({ ctx, input }) => {
-    return await ctx.prisma.siteAccount.findMany({
-      where: {
-        siteId: input.siteId
-      }
-    })
-  })
-})
+    .input(
+      z.object({
+        siteId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.siteAccount.findMany({
+        where: {
+          siteId: input.siteId,
+        },
+      });
+    }),
+
+  deleteAccount: protectedProcedure
+    .input(
+      z.object({
+        accountId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      return await ctx.prisma.siteAccount.delete({
+        where: {
+          id: input.accountId,
+        },
+      });
+    }),
+});

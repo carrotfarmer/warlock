@@ -16,7 +16,6 @@ import { Account } from "@/components/account/Account";
 const SitePage: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
-  console.log(id);
 
   const { data: siteData, isLoading } = api.site.getSite.useQuery({ siteId: id as string });
 
@@ -61,7 +60,7 @@ const SitePage: NextPage = () => {
         )}
 
         <div className="flex justify-center px-20">
-          <div className="pt-10">
+          <div className="pt-10 max-w-4xl">
               {siteData?.accounts.map((account) => (
                 <Account key={account.id} account={account} />
               ))}
