@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import Link from "next/link";
 import { Inter } from "next/font/google";
 
@@ -22,23 +23,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../ui/Dialog";
 
 import { HoverIconButton } from "../HoverIconButton";
 
 import type { ExtendedSite } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 import { Download, Trash2 } from "lucide-react";
-import { LockOpen1Icon } from "@radix-ui/react-icons";
 import { Label } from "@radix-ui/react-label";
+
 import { Input } from "../ui/Input";
-import { EncryptionKeyHint } from "./EncryptionKeyHint";
 import { Button } from "../ui/Button";
+
+import { EncryptionKeyHint } from "./EncryptionKeyHint";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+
 import { api } from "@/utils/api";
 import { useToast } from "@/lib/hooks/use-toast";
 
@@ -100,7 +102,7 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-3 justify-items-start">
           <HoverIconButton tooltipText="download data">
             <Download className="h-4 w-4" />
           </HoverIconButton>
@@ -137,7 +139,6 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
                       enter this site&apos;s encryption key to view the credentials. if you do not
                       remember the encryption key you can use the hint given below.
                     </p>
-
                     <Label>encryption key</Label>
                     <Input type="password" {...register("encryptionKey")} />
                     <p className="pt-1 text-red-500">{errors.encryptionKey?.message}</p>
