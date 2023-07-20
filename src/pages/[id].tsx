@@ -8,7 +8,7 @@ import { HoverIconButton } from "@/components/HoverIconButton";
 
 import { api } from "@/utils/api";
 
-import { ChevronLeft, Download, Trash2 } from "lucide-react";
+import { ChevronLeft, Download, PlusSquare, Trash2 } from "lucide-react";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import { CreateAccount } from "@/components/account/CreateAccount";
 import { Account } from "@/components/account/Account";
@@ -47,7 +47,10 @@ const SitePage: NextPage = () => {
                   <Pencil2Icon className="h-4 w-4" />
                 </HoverIconButton>
 
-                <HoverIconButton tooltipText="delete site" buttonProps="border-red-400 text-red-300 hover:text-red-900 hover:bg-red-300">
+                <HoverIconButton
+                  tooltipText="delete site"
+                  buttonProps="border-red-400 text-red-300 hover:text-red-900 hover:bg-red-300"
+                >
                   <Trash2 className="h-4 w-4" />
                 </HoverIconButton>
               </div>
@@ -55,16 +58,23 @@ const SitePage: NextPage = () => {
             <div className="flex justify-center">
               <CreateAccount siteId={siteData?.id as string} />
             </div>
-
           </>
         )}
 
         <div className="flex justify-center px-20">
-          <div className="pt-10 max-w-4xl">
-              {siteData?.accounts.map((account) => (
-                <Account key={account.id} account={account} />
-              ))}
-            </div>
+          <div className="max-w-4xl pt-10">
+            {siteData?.accounts.length === 0 && (
+              <div>
+                <PlusSquare className="mx-auto h-48 w-48 text-gray-700" />
+                <p className="pt-5 text-center text-xl text-muted-foreground">
+                  create an account to get started!
+                </p>
+              </div>
+            )}
+            {siteData?.accounts.map((account) => (
+              <Account key={account.id} account={account} />
+            ))}
+          </div>
         </div>
       </main>
     </>

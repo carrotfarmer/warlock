@@ -11,7 +11,7 @@ export const CreateSite: React.FC<CreateSiteProps> = ({}) => {
 
   return (
     <div>
-      <Button variant="outline" className="h-48 w-48" onClick={() => router.push(`/create`)}>
+      <Button variant="outline" className="w-48 h-32" onClick={() => router.push(`/create`)}>
         add site
       </Button>
     </div>

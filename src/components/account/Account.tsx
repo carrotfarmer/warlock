@@ -22,6 +22,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/Button";
 import { useToast } from "@/lib/hooks/use-toast";
+import { api } from "@/utils/api";
 
 interface AccountProps {
   account: SiteAccount;
@@ -55,6 +56,13 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
+
+  const utils = api.useContext();
+  const { mutate: deleteAccount } = api.account.deleteAccount.useMutation({
+    onSuccess: async () => {
+      await utils.invalidate()
+    },
+  })
 
   const { toast } = useToast();
 
@@ -121,7 +129,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
                     </p>
 
                     <Label>encryption key</Label>
-                    <Input {...register("encryptionKey")} />
+                    <Input type="password" {...register("encryptionKey")} />
                     <p className="pt-1 text-red-500">{errors.encryptionKey?.message}</p>
                     <EncryptionKeyHint siteId={account.siteId} />
                   </DialogDescription>
@@ -165,6 +173,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
                 await navigator.clipboard.writeText(password);
                 setIsVisible(false);
                 setPassword("*************");
+                setEmail(displayEmail(account.email))
               }}
             >
               <Copy className="h-4 w-4" />
@@ -173,6 +182,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
               tooltipText="delete credentials"
               // eslint-disable-next-line
               onClick={async () => {
+                deleteAccount({ accountId: account.id })
                 toast({
                   title: "deleted credentials successfully",
                   variant: "default",

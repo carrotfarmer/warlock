@@ -15,7 +15,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ userId }) => {
     <div>
       <Title>my sites</Title>
 
-      <div className="grid grid-cols-6 gap-5 pt-5">
+      <div className="grid grid-cols-5 gap-5 pt-5 pr-16">
         {sitesData &&
           sitesData.map((site) => (
             <div key={site.id}>
