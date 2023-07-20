@@ -15,12 +15,32 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/AlertDialog";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/Dialog";
+
 import { HoverIconButton } from "../HoverIconButton";
 
 import type { ExtendedSite } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { Download, Trash2 } from "lucide-react";
+import { LockOpen1Icon } from "@radix-ui/react-icons";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "../ui/Input";
+import { EncryptionKeyHint } from "./EncryptionKeyHint";
+import { Button } from "../ui/Button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { api } from "@/utils/api";
+import { useToast } from "@/lib/hooks/use-toast";
 
 interface SiteCardProps {
   site: ExtendedSite;
@@ -28,8 +48,44 @@ interface SiteCardProps {
 
 const inter = Inter({ subsets: ["latin"] });
 
+const formSchema = z.object({
+  encryptionKey: z
+    .string()
+    .min(3, { message: "encryption key must be at least 3 characters long" })
+    .max(75, { message: "encryption key cannot be greater than 75 characters" }),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
 export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const utils = api.useContext();
+  const { mutate: deleteSite } = api.site.deleteSite.useMutation({
+    onSuccess: async () => {
+      await utils.invalidate();
+    }
+  })
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const { toast } = useToast();
+
+  const onSubmit = (): void => {
+    deleteSite({ siteId: site.id })
+    reset();
+    toast({
+      title: "successfully deleted site",
+      description: "you have successfully deleted this site."
+    })
+  }
 
   return (
     <Card className="h-32 max-w-xl">
@@ -69,6 +125,33 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className={inter.className}>
+              {/* eslint-disable-next-line */}
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <DialogHeader>
+                  <DialogTitle>enter encryption key</DialogTitle>
+                  <DialogDescription>
+                    <p className="pb-5">
+                      enter this site&apos;s encryption key to view the credentials. if you do not
+                      remember the encryption key you can use the hint given below.
+                    </p>
+
+                    <Label>encryption key</Label>
+                    <Input type="password" {...register("encryptionKey")} />
+                    <p className="pt-1 text-red-500">{errors.encryptionKey?.message}</p>
+                    <EncryptionKeyHint siteId={site.id} />
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <div className="pt-5">
+                    <Button type="submit">delete credentials</Button>
+                  </div>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </CardContent>
     </Card>
