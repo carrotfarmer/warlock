@@ -22,3 +22,12 @@ export const CreateSiteValidator = SiteValidator.extend({
 });
 
 export type CreateSiteFormData = z.infer<typeof CreateSiteValidator>;
+
+export const SiteActionValidator = z.object({
+  encryptionKey: z
+    .string()
+    .min(3, { message: "encryption key must be at least 3 characters long" })
+    .max(75, { message: "encryption key cannot be greater than 75 characters" }),
+});
+ 
+export type SiteActionFormData = z.infer<typeof SiteActionValidator>;

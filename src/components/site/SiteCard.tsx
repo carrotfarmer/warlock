@@ -43,21 +43,13 @@ import { z } from "zod";
 
 import { api } from "@/utils/api";
 import { useToast } from "@/lib/hooks/use-toast";
+import { SiteActionFormData, SiteActionValidator } from "@/lib/validators/site";
 
 interface SiteCardProps {
   site: ExtendedSite;
 }
 
 const inter = Inter({ subsets: ["latin"] });
-
-const formSchema = z.object({
-  encryptionKey: z
-    .string()
-    .min(3, { message: "encryption key must be at least 3 characters long" })
-    .max(75, { message: "encryption key cannot be greater than 75 characters" }),
-});
-
-type FormData = z.infer<typeof formSchema>;
 
 export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -74,8 +66,8 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  } = useForm<SiteActionFormData>({
+    resolver: zodResolver(SiteActionValidator),
   });
 
   const { toast } = useToast();

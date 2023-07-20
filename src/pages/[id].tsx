@@ -13,9 +13,72 @@ import { Pencil2Icon } from "@radix-ui/react-icons";
 import { CreateAccount } from "@/components/account/CreateAccount";
 import { Account } from "@/components/account/Account";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/AlertDialog";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/lib/hooks/use-toast";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { EncryptionKeyHint } from "@/components/site/EncryptionKeyHint";
+import { Inter } from "next/font/google";
+import { z } from "zod";
+import { useState } from "react";
+import { SiteActionFormData, SiteActionValidator } from "@/lib/validators/site";
+
+const inter = Inter({ subsets: ["latin"] });
+
 const SitePage: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const utils = api.useContext();
+  const { mutate: deleteSite } = api.site.deleteSite.useMutation({
+    onSuccess: async () => {
+      await utils.invalidate();
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<SiteActionFormData>({
+    resolver: zodResolver(SiteActionValidator),
+  });
+
+  const { toast } = useToast();
+
+  const onSubmit = (): void => {
+    deleteSite({ siteId: id as string });
+    reset();
+    toast({
+      title: "successfully deleted site",
+      description: "you have successfully deleted this site.",
+    });
+    setIsOpen(false);
+  };
 
   const { data: siteData, isLoading } = api.site.getSite.useQuery({ siteId: id as string });
 
@@ -47,12 +110,57 @@ const SitePage: NextPage = () => {
                   <Pencil2Icon className="h-4 w-4" />
                 </HoverIconButton>
 
-                <HoverIconButton
-                  tooltipText="delete site"
-                  buttonProps="border-red-400 text-red-300 hover:text-red-900 hover:bg-red-300"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </HoverIconButton>
+                <AlertDialog>
+                  <AlertDialogTrigger>
+                    <HoverIconButton
+                      tooltipText="delete site"
+                      buttonProps="border-red-400 text-red-300 hover:text-red-900 hover:bg-red-300"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </HoverIconButton>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className={inter.className}>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        this action cannot be undone. this will permanently delete this site and
+                        remove your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => setIsOpen(true)}>
+                        Continue
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                  <DialogContent className={inter.className}>
+                    {/* eslint-disable-next-line */}
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                      <DialogHeader>
+                        <DialogTitle>enter encryption key</DialogTitle>
+                        <DialogDescription>
+                          <p className="pb-5">
+                            enter this site&apos;s encryption key to view the credentials. if you do
+                            not remember the encryption key you can use the hint given below.
+                          </p>
+                          <Label>encryption key</Label>
+                          <Input type="password" {...register("encryptionKey")} />
+                          <p className="pt-1 text-red-500">{errors.encryptionKey?.message}</p>
+                          <EncryptionKeyHint siteId={id as string} />
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <div className="pt-5">
+                          <Button type="submit">delete credentials</Button>
+                        </div>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
             <div className="flex justify-center">
