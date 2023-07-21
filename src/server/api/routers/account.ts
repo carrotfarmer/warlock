@@ -43,4 +43,22 @@ export const accountRouter = createTRPCRouter({
         },
       });
     }),
+
+  editPassword: protectedProcedure
+    .input(
+      z.object({
+        accountId: z.string(),
+        encryptedPassword: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.siteAccount.update({
+        where: {
+          id: input.accountId,
+        },
+        data: {
+          encryptedPassword: input.encryptedPassword,
+        },
+      });
+    }),
 });

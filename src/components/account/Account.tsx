@@ -158,7 +158,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
 
         {isVisible && (
           <div className="grid grid-cols-3 gap-12">
-            <HoverIconButton tooltipText="edit credentials">
+            <HoverIconButton tooltipText="edit password">
               <Pencil2Icon className="h-4 w-4" />
             </HoverIconButton>
 
