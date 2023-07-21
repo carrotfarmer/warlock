@@ -56,6 +56,24 @@ const inter = Inter({ subsets: ["latin"] });
 export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
+  const [isVerifySuccess, setIsVerifySuccess] = useState<boolean>(false);
+
+  const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
+    onSuccess: () => {
+      setIsVerifySuccess(true);
+    },
+
+    onError: (error) => {
+      setIsVerifySuccess(false);
+      reset();
+
+      toast({
+        title: "permission denied",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
+  })
 
   const utils = api.useContext();
   const { mutate: deleteSite } = api.site.deleteSite.useMutation({
@@ -98,7 +116,13 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
 
   const { toast } = useToast();
 
-  const onSubmit = (): void => {
+  const onSubmit = (data: SiteActionFormData): void => {
+    verify({ siteId: site.id, encryptionKey: data.encryptionKey });
+
+    if (!isVerifySuccess) {
+      return;
+    }
+
     deleteSite({ siteId: site.id });
     reset();
     toast({

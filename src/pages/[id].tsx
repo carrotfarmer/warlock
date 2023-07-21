@@ -49,6 +49,7 @@ import { useToast } from "@/lib/hooks/use-toast";
 import { type SiteActionFormData, SiteActionValidator } from "@/lib/validators/site";
 
 import fileDownload from "js-file-download";
+import { EditSiteDialog } from "@/components/site/EditSiteDialog";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -59,9 +60,37 @@ const SitePage: NextPage = () => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
+  // encryption key for edit
+  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+  // actual edit dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
+
+  const [isVerifySuccess, setIsVerifySuccess] = useState<boolean>(false);
+
+  const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
+    onSuccess: () => {
+      setIsVerifySuccess(true);
+    },
+    onError: (error) => {
+      toast({
+        title: "permission denied",
+        description: error.message,
+        variant: "destructive"
+      })
+
+      setIsVerifySuccess(false);
+      resetDownload();
+    }
+  })
 
   const utils = api.useContext();
   const { mutate: deleteSite } = api.site.deleteSite.useMutation({
+    onSuccess: async () => {
+      await utils.invalidate();
+    },
+  });
+
+  const { mutate: editSite } = api.site.editSite.useMutation({
     onSuccess: async () => {
       await utils.invalidate();
     },
@@ -79,6 +108,13 @@ const SitePage: NextPage = () => {
 
       setIsDownloadOpen(false);
     },
+    onError: (error) => {
+      toast({
+        title: "could not download data",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
   });
 
   const {
@@ -99,10 +135,26 @@ const SitePage: NextPage = () => {
     resolver: zodResolver(SiteActionValidator),
   });
 
+  const {
+    register: registerEdit,
+    handleSubmit: handleEditSubmit,
+    formState: { errors: editErrors },
+    reset: resetEdit,
+  } = useForm<SiteActionFormData>({
+    resolver: zodResolver(SiteActionValidator),
+  });
+
   const { toast } = useToast();
 
   // deletion
-  const onSubmit = (): void => {
+  const onSubmit = (data: SiteActionFormData): void => {
+    // verify encryption key
+    verify({ siteId: id as string, encryptionKey: data.encryptionKey });
+
+    if (!isVerifySuccess) {
+      return;
+    }
+
     deleteSite({ siteId: id as string });
     reset();
     toast({
@@ -115,6 +167,11 @@ const SitePage: NextPage = () => {
   // download
   const onDownloadSubmit = (data: SiteActionFormData): void => {
     downloadData({ siteId: id as string, encryptionKey: data.encryptionKey });
+  };
+
+  // edit 
+  const onEditSubmit = (data: SiteActionFormData): void => {
+    setIsEditDialogOpen(true);
   };
 
   const {
@@ -186,9 +243,41 @@ const SitePage: NextPage = () => {
                   </DialogContent>
                 </Dialog>
 
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                  <DialogTrigger>
                 <HoverIconButton tooltipText="edit site">
                   <Pencil2Icon className="h-4 w-4" />
                 </HoverIconButton>
+                  </DialogTrigger>
+                  <DialogContent className={inter.className}>
+                    {/* eslint-disable-next-line */}
+                    <form onSubmit={handleEditSubmit(onEditSubmit)}>
+                      <DialogHeader>
+                        <DialogTitle>enter encryption key</DialogTitle>
+                        <DialogDescription>
+                          <p className="pb-5">
+                            enter this site&apos;s encryption key to edit the site details. if you do
+                            not remember the encryption key you can use the hint given below.
+                          </p>
+
+                          <Label>encryption key</Label>
+                          <Input type="password" {...registerEdit("encryptionKey")} />
+                          <p className="pt-1 text-red-500">
+                            {editErrors.encryptionKey?.message}
+                          </p>
+                          <EncryptionKeyHint siteId={id as string} />
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <div className="pt-5">
+                          <Button type="submit">edit site details</Button>
+                        </div>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                <EditSiteDialog isOpen={isEditDialogOpen} setIsOpen={setIsEditDialogOpen} />
 
                 <AlertDialog>
                   <AlertDialogTrigger>
@@ -224,7 +313,7 @@ const SitePage: NextPage = () => {
                         <DialogTitle>enter encryption key</DialogTitle>
                         <DialogDescription>
                           <p className="pb-5">
-                            enter this site&apos;s encryption key to view the credentials. if you do
+                            enter this site&apos;s encryption key to delete the credentials. if you do
                             not remember the encryption key you can use the hint given below.
                           </p>
                           <Label>encryption key</Label>

@@ -109,11 +109,19 @@ export const siteRouter = createTRPCRouter({
         throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
       }
 
-      // decrypt passwords
       const data = site.accounts.map((account) => {
+        const decryptedPassword = decrypt(account.encryptedPassword, input.encryptionKey);
+
+        if (decryptedPassword.includes("�")) {
+          throw new TRPCError({
+            message: "invalid encryption key",
+            code: "BAD_REQUEST",
+          });
+        }
+
         return {
           ...account,
-          password: decrypt(account.encryptedPassword, input.encryptionKey),
+          password: decryptedPassword,
         };
       });
 
@@ -123,5 +131,63 @@ export const siteRouter = createTRPCRouter({
         file,
         fileName: `${site.name}.json`,
       };
+    }),
+
+  editSite: protectedProcedure
+    .input(
+      SiteValidator.extend({
+        siteId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.prisma.site.update({
+        where: {
+          id: input.siteId,
+        },
+        data: {
+          name: input.name,
+          encryptionKeyHint: input.encryptionKeyHint,
+        },
+      });
+    }),
+
+  verifyEncryptionKey: protectedProcedure
+    .input(
+      z.object({
+        siteId: z.string(),
+        encryptionKey: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const site = await ctx.prisma.site.findUnique({
+        where: {
+          id: input.siteId,
+        },
+        include: {
+          accounts: true,
+        },
+      });
+
+      if (!site) {
+        throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
+      }
+
+      const data = site.accounts.map((account) => {
+        const decryptedPassword = decrypt(account.encryptedPassword, input.encryptionKey);
+
+        if (decryptedPassword.includes("�")) {
+          throw new TRPCError({
+            message: "invalid encryption key",
+            code: "BAD_REQUEST",
+          });
+        }
+
+        return {
+          ...account,
+          password: decryptedPassword,
+        };
+      });
+
+      return data;
     }),
 });
