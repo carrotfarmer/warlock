@@ -94,12 +94,6 @@ const SitePage: NextPage = () => {
     },
   });
 
-  const { mutate: editSite } = api.site.editSite.useMutation({
-    onSuccess: async () => {
-      await utils.invalidate();
-    },
-  });
-
   const { mutate: downloadData } = api.site.downloadSiteData.useMutation({
     onSuccess: (data) => {
       fileDownload(data.file, `${siteData?.name as string}.json`);
