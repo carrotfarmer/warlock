@@ -61,6 +61,9 @@ dependencies:
   clsx:
     specifier: ^2.0.0
     version: 2.0.0
+  js-file-download:
+    specifier: ^0.4.12
+    version: 0.4.12
   lucide-react:
     specifier: ^0.260.0
     version: 0.260.0(react@18.2.0)
@@ -2653,6 +2656,10 @@ packages:
 
   /jose@4.14.4:
     resolution: {integrity: sha512-j8GhLiKmUAh+dsFXlX1aJCbt5KMibuKb+d7j1JaOJG6s2UjX1PQlW+OKB/sD4a/5ZYF4RcmYmLSndOoU3Lt/3g==}
+    dev: false
+
+  /js-file-download@0.4.12:
+    resolution: {integrity: sha512-rML+NkoD08p5Dllpjo0ffy4jRHeY6Zsapvr/W86N7E0yuzAO6qa5X9+xog6zQNlH102J7IXljNY2FtS6Lj3ucg==}
     dev: false
 
   /js-sdsl@4.4.1:

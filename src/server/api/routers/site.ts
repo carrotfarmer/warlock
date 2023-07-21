@@ -1,6 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { SiteValidator } from "@/lib/validators/site";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
+import { decrypt } from "@/lib/utils";
 
 export const siteRouter = createTRPCRouter({
   createSite: protectedProcedure.input(SiteValidator).mutation(async ({ input, ctx }) => {
@@ -72,5 +74,44 @@ export const siteRouter = createTRPCRouter({
           id: input.siteId,
         },
       });
+    }),
+
+  downloadSiteData: protectedProcedure
+    .input(
+      z.object({
+        siteId: z.string(),
+        encryptionKey: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const site = await ctx.prisma.site.findUnique({
+        where: {
+          id: input.siteId,
+        },
+        include: {
+          accounts: true,
+        },
+      });
+
+      if (!site) {
+        throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
+      }
+
+      const passwords = site.accounts.map((account) => account.encryptedPassword);
+
+      // decrypt passwords
+      const data = site.accounts.map((account) => {
+        return {
+          ...account,
+          password: decrypt(account.encryptedPassword, input.encryptionKey),
+        };
+      });
+
+      const file = JSON.stringify(data, null, 2);
+
+      return {
+        file,
+        fileName: `${site.name}.json`,
+      };
     }),
 });

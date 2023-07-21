@@ -1,17 +1,15 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
+import { Inter } from "next/font/google";
+
+import { useState } from "react";
 
 import { Navbar } from "@/components/Navbar";
 import { Title } from "@/components/Title";
 import { Button } from "@/components/ui/Button";
 import { HoverIconButton } from "@/components/HoverIconButton";
-
-import { api } from "@/utils/api";
-
-import { ChevronLeft, Download, PlusSquare, Trash2 } from "lucide-react";
-import { Pencil2Icon } from "@radix-ui/react-icons";
-import { CreateAccount } from "@/components/account/CreateAccount";
-import { Account } from "@/components/account/Account";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 
 import {
   AlertDialog,
@@ -32,17 +30,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/Dialog";
+
+import { api } from "@/utils/api";
+
+import { ChevronLeft, Download, PlusSquare, Trash2 } from "lucide-react";
+import { Pencil2Icon } from "@radix-ui/react-icons";
+
+import { CreateAccount } from "@/components/account/CreateAccount";
+import { Account } from "@/components/account/Account";
+import { EncryptionKeyHint } from "@/components/site/EncryptionKeyHint";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/lib/hooks/use-toast";
-import { Input } from "@/components/ui/Input";
-import { Label } from "@/components/ui/Label";
-import { EncryptionKeyHint } from "@/components/site/EncryptionKeyHint";
-import { Inter } from "next/font/google";
-import { z } from "zod";
-import { useState } from "react";
-import { SiteActionFormData, SiteActionValidator } from "@/lib/validators/site";
+import { type SiteActionFormData, SiteActionValidator } from "@/lib/validators/site";
+
+import fileDownload from "js-file-download";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,11 +56,26 @@ const SitePage: NextPage = () => {
   const { id } = router.query;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
 
   const utils = api.useContext();
   const { mutate: deleteSite } = api.site.deleteSite.useMutation({
     onSuccess: async () => {
       await utils.invalidate();
+    },
+  });
+
+  const { mutate: downloadData } = api.site.downloadSiteData.useMutation({
+    onSuccess: (data) => {
+      fileDownload(data.file, `${siteData?.name as string}.json`);
+      resetDownload();
+
+      toast({
+        title: "successfully downloaded data",
+        description: "successfully downloaded decrypted data.",
+      });
+
+      setIsDownloadOpen(false);
     },
   });
 
@@ -68,8 +88,18 @@ const SitePage: NextPage = () => {
     resolver: zodResolver(SiteActionValidator),
   });
 
+  const {
+    register: registerDownload,
+    handleSubmit: handleDownloadSubmit,
+    formState: { errors: downloadErrors },
+    reset: resetDownload,
+  } = useForm<SiteActionFormData>({
+    resolver: zodResolver(SiteActionValidator),
+  });
+
   const { toast } = useToast();
 
+  // deletion
   const onSubmit = (): void => {
     deleteSite({ siteId: id as string });
     reset();
@@ -78,6 +108,11 @@ const SitePage: NextPage = () => {
       description: "you have successfully deleted this site.",
     });
     setIsOpen(false);
+  };
+
+  // download
+  const onDownloadSubmit = (data: SiteActionFormData): void => {
+    downloadData({ siteId: id as string, encryptionKey: data.encryptionKey });
   };
 
   const { data: siteData, isLoading } = api.site.getSite.useQuery({ siteId: id as string });
@@ -102,9 +137,42 @@ const SitePage: NextPage = () => {
             </div>
             <div className="w-2xl flex justify-center">
               <div className="grid grid-cols-3 gap-5 pt-5">
-                <HoverIconButton tooltipText="download data">
-                  <Download className="h-4 w-4" />
-                </HoverIconButton>
+                <Dialog open={isDownloadOpen} onOpenChange={setIsDownloadOpen}>
+                  <DialogTrigger>
+                    <HoverIconButton
+                      tooltipText="download data"
+                      onClick={() => setIsDownloadOpen(true)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </HoverIconButton>
+                  </DialogTrigger>
+                  <DialogContent className={inter.className}>
+                    {/* eslint-disable-next-line */}
+                    <form onSubmit={handleDownloadSubmit(onDownloadSubmit)}>
+                      <DialogHeader>
+                        <DialogTitle>enter encryption key</DialogTitle>
+                        <DialogDescription>
+                          <p className="pb-5">
+                            enter this site&apos;s encryption key to view the credentials. if you do
+                            not remember the encryption key you can use the hint given below.
+                          </p>
+
+                          <Label>encryption key</Label>
+                          <Input type="password" {...registerDownload("encryptionKey")} />
+                          <p className="pt-1 text-red-500">
+                            {downloadErrors.encryptionKey?.message}
+                          </p>
+                          <EncryptionKeyHint siteId={id as string} />
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <div className="pt-5">
+                          <Button type="submit">download data</Button>
+                        </div>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
 
                 <HoverIconButton tooltipText="edit site">
                   <Pencil2Icon className="h-4 w-4" />

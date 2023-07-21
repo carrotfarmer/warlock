@@ -23,7 +23,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/Button";
 import { useToast } from "@/lib/hooks/use-toast";
 import { api } from "@/utils/api";
-import { SiteActionFormData, SiteActionValidator } from "@/lib/validators/site";
 
 interface AccountProps {
   account: SiteAccount;
@@ -32,6 +31,15 @@ interface AccountProps {
 const inter = Inter({
   subsets: ["latin"],
 });
+
+const formSchema = z.object({
+  encryptionKey: z
+    .string()
+    .min(3, { message: "encryption key must be at least 3 characters long" })
+    .max(75, { message: "encryption key cannot be greater than 75 characters" }),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export const Account: React.FC<AccountProps> = ({ account }) => {
   const [email, setEmail] = useState<string>(displayEmail(account.email));
@@ -46,8 +54,8 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<SiteActionFormData>({
-    resolver: zodResolver(SiteActionValidator),
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
   });
 
   const utils = api.useContext();
