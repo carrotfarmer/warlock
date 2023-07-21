@@ -123,6 +123,8 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
       return;
     }
 
+    setIsVerifySuccess(false);
+
     deleteSite({ siteId: site.id });
     reset();
     toast({

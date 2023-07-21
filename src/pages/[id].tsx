@@ -65,11 +65,14 @@ const SitePage: NextPage = () => {
   // actual edit dialog
   const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false);
 
-  const [isVerifySuccess, setIsVerifySuccess] = useState<boolean>(false);
+  const [isVerifySuccess, setIsVerifySuccess] = useState<boolean | null>(null);
 
   const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
     onSuccess: () => {
       setIsVerifySuccess(true);
+      if (setIsEditDialogOpen !== null) {
+        setIsEditDialogOpen(true);
+      }
     },
     onError: (error) => {
       toast({
@@ -78,6 +81,7 @@ const SitePage: NextPage = () => {
         variant: "destructive"
       })
 
+      setIsEditDialogOpen(false);
       setIsVerifySuccess(false);
       resetDownload();
     }
@@ -151,7 +155,7 @@ const SitePage: NextPage = () => {
     // verify encryption key
     verify({ siteId: id as string, encryptionKey: data.encryptionKey });
 
-    if (!isVerifySuccess) {
+    if (isVerifySuccess === false) {
       return;
     }
 
@@ -162,6 +166,7 @@ const SitePage: NextPage = () => {
       description: "you have successfully deleted this site.",
     });
     setIsOpen(false);
+    setIsVerifySuccess(null);
   };
 
   // download
@@ -171,7 +176,20 @@ const SitePage: NextPage = () => {
 
   // edit 
   const onEditSubmit = (data: SiteActionFormData): void => {
+    verify({ siteId: id as string, encryptionKey: data.encryptionKey });
+    console.log(isVerifySuccess)
+
+    if (typeof isVerifySuccess === "boolean" && isVerifySuccess === false) {
+      setIsVerifySuccess(false);
+      setIsEditDialogOpen(false);
+      resetEdit();
+      return;
+    }
+
+    setIsVerifySuccess(null);
+    setIsEditOpen(false);
     setIsEditDialogOpen(true);
+    resetEdit();
   };
 
   const {
@@ -277,7 +295,7 @@ const SitePage: NextPage = () => {
                   </DialogContent>
                 </Dialog>
 
-                <EditSiteDialog isOpen={isEditDialogOpen} setIsOpen={setIsEditDialogOpen} />
+                <EditSiteDialog isOpen={isEditDialogOpen} setIsOpen={setIsEditDialogOpen} site={siteData!} />
 
                 <AlertDialog>
                   <AlertDialogTrigger>
