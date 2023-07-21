@@ -15,11 +15,15 @@ const CreateSiteAccount: NextPage = () => {
   const routerRouter = useRouterRouter();
   const { id } = routerRouter.query;
 
-  const { data: siteData, isLoading } = api.site.getSite.useQuery({ siteId: id as string });
+  const { data: siteData, error } = api.site.getSite.useQuery({ siteId: id as string });
   const { data: sessionData, status } = useSession();
 
   if (status !== "loading" && !sessionData?.user) {
     router.push("/sign-in");
+  }
+
+  if (error?.data?.code === "NOT_FOUND") {
+    router.push("/404");
   }
 
   return (

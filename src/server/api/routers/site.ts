@@ -34,7 +34,7 @@ export const siteRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.prisma.site.findUnique({
+      const site = await ctx.prisma.site.findUnique({
         where: {
           id: input.siteId,
         },
@@ -43,6 +43,12 @@ export const siteRouter = createTRPCRouter({
           accounts: true,
         },
       });
+
+      if (!site) {
+        throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
+      }
+
+      return site;
     }),
 
   getEncryptionKeyHint: protectedProcedure
@@ -52,7 +58,7 @@ export const siteRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.prisma.site.findUnique({
+      const data = await ctx.prisma.site.findUnique({
         where: {
           id: input.siteId,
         },
@@ -60,6 +66,12 @@ export const siteRouter = createTRPCRouter({
           encryptionKeyHint: true,
         },
       });
+
+      if (!data) {
+        throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
+      }
+
+      return data;
     }),
 
   deleteSite: protectedProcedure
@@ -96,8 +108,6 @@ export const siteRouter = createTRPCRouter({
       if (!site) {
         throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
       }
-
-      const passwords = site.accounts.map((account) => account.encryptedPassword);
 
       // decrypt passwords
       const data = site.accounts.map((account) => {

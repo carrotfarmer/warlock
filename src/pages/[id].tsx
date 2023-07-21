@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
+import { useRouter as useRouterRouter } from "next/navigation";
 import { Inter } from "next/font/google";
 
 import { useState } from "react";
@@ -53,6 +54,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const SitePage: NextPage = () => {
   const router = useRouter();
+  const routerRouter = useRouterRouter();
   const { id } = router.query;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -115,7 +117,17 @@ const SitePage: NextPage = () => {
     downloadData({ siteId: id as string, encryptionKey: data.encryptionKey });
   };
 
-  const { data: siteData, isLoading } = api.site.getSite.useQuery({ siteId: id as string });
+  const {
+    data: siteData,
+    isLoading,
+    error,
+  } = api.site.getSite.useQuery({
+    siteId: id as string,
+  });
+
+  if (error?.data?.code === "NOT_FOUND") {
+    routerRouter.push("/404");
+  }
 
   return (
     <>
