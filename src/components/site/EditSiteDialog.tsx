@@ -47,7 +47,6 @@ export const EditSiteDialog: React.FC<EditSiteDialogProps> = ({ isOpen, setIsOpe
   });
 
   const onSubmit = (data: SiteRequest) => {
-    console.log("9HERJFIJEROIJ")
     editSite({ siteId: site.id, encryptionKeyHint: data.encryptionKeyHint, name: data.name });
     setIsOpen(false);
     reset();

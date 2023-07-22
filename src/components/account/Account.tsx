@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/Button";
 import { useToast } from "@/lib/hooks/use-toast";
 import { api } from "@/utils/api";
+import { EditAccountDialog } from "./EditAccountDialog";
 
 interface AccountProps {
   account: SiteAccount;
@@ -49,6 +50,9 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
   // unlock dialog
   const [open, setIsOpen] = useState<boolean>(false);
 
+  // edit dialog
+  const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
+
   const {
     register,
     handleSubmit,
@@ -61,9 +65,9 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
   const utils = api.useContext();
   const { mutate: deleteAccount } = api.account.deleteAccount.useMutation({
     onSuccess: async () => {
-      await utils.invalidate()
+      await utils.invalidate();
     },
-  })
+  });
 
   const { toast } = useToast();
 
@@ -158,9 +162,18 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
 
         {isVisible && (
           <div className="grid grid-cols-3 gap-12">
-            <HoverIconButton tooltipText="edit password">
+            <HoverIconButton tooltipText="edit password" onClick={() => setIsEditOpen(true)}>
               <Pencil2Icon className="h-4 w-4" />
             </HoverIconButton>
+
+            <EditAccountDialog
+              isOpen={isEditOpen}
+              setIsOpen={setIsEditOpen}
+              decryptedPassword={password}
+              account={account}
+              setIsVisible={setIsVisible}
+              setPassword={setPassword}
+            />
 
             <HoverIconButton
               tooltipText="copy password"
@@ -174,7 +187,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
                 await navigator.clipboard.writeText(password);
                 setIsVisible(false);
                 setPassword("*************");
-                setEmail(displayEmail(account.email))
+                setEmail(displayEmail(account.email));
               }}
             >
               <Copy className="h-4 w-4" />
@@ -183,7 +196,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
               tooltipText="delete credentials"
               // eslint-disable-next-line
               onClick={async () => {
-                deleteAccount({ accountId: account.id })
+                deleteAccount({ accountId: account.id });
                 toast({
                   title: "deleted credentials successfully",
                   variant: "default",

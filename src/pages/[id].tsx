@@ -71,7 +71,6 @@ const SitePage: NextPage = () => {
     onSuccess: () => {
       setIsVerifySuccess(true);
       setIsOpen(false);
-      router.push("/")
     },
     onError: (error) => {
       toast({
@@ -95,6 +94,7 @@ const SitePage: NextPage = () => {
         description: "successfully deleted site and credentials.",
       })
       await utils.invalidate();
+      await router.push("/")
     },
   });
 
@@ -317,10 +317,10 @@ const SitePage: NextPage = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => {
+                      <AlertDialogAction onClick={async () => {
                           if (siteData!.accounts.length < 1) {
                             deleteSite({ siteId: siteData!.id }) 
-                            router.push("/")
+                            await router.push("/")
                             return;
                           }
 
