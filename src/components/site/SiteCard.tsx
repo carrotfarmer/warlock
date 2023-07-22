@@ -60,9 +60,8 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const [isVerifySuccess, setIsVerifySuccess] = useState<boolean | null>(null);
 
   const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       setIsVerifySuccess(true)
-      setTimeout(() => {}, 250)
     },
     onError: (error) => {
       toast({
@@ -79,6 +78,10 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const utils = api.useContext();
   const { mutate: deleteSite } = api.site.deleteSite.useMutation({
     onSuccess: async () => {
+      toast({
+        title: "successfully deleted site",
+        description: "successfully deleted site and all credentials.",
+      })
       await utils.invalidate();
     },
   });

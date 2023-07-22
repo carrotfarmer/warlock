@@ -70,9 +70,8 @@ const SitePage: NextPage = () => {
   const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
     onSuccess: () => {
       setIsVerifySuccess(true);
-      if (isEditDialogOpen !== null) {
-        setIsEditDialogOpen(true);
-      }
+      setIsOpen(false);
+      router.push("/")
     },
     onError: (error) => {
       toast({
@@ -83,6 +82,7 @@ const SitePage: NextPage = () => {
 
       setIsEditDialogOpen(false);
       setIsVerifySuccess(false);
+      reset();
       resetDownload();
     }
   })
@@ -90,6 +90,10 @@ const SitePage: NextPage = () => {
   const utils = api.useContext();
   const { mutate: deleteSite } = api.site.deleteSite.useMutation({
     onSuccess: async () => {
+      toast({
+        title: "successfully deleted site",
+        description: "successfully deleted site and credentials.",
+      })
       await utils.invalidate();
     },
   });
@@ -146,21 +150,24 @@ const SitePage: NextPage = () => {
 
   // deletion
   const onSubmit = (data: SiteActionFormData): void => {
+    if (siteData!.accounts.length < 1) {
+      setIsOpen(true);
+      deleteSite({ siteId: siteData!.id });
+      return;
+    }
+
     // verify encryption key
     verify({ siteId: id as string, encryptionKey: data.encryptionKey });
 
     if (isVerifySuccess === false) {
+      setIsVerifySuccess(false);
+      reset();
       return;
     }
 
     deleteSite({ siteId: id as string });
-    reset();
-    toast({
-      title: "successfully deleted site",
-      description: "you have successfully deleted this site.",
-    });
-    setIsOpen(false);
     setIsVerifySuccess(null);
+    reset();
   };
 
   // download
@@ -310,7 +317,15 @@ const SitePage: NextPage = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => setIsOpen(true)}>
+                      <AlertDialogAction onClick={() => {
+                          if (siteData!.accounts.length < 1) {
+                            deleteSite({ siteId: siteData!.id }) 
+                            router.push("/")
+                            return;
+                          }
+
+                          setIsOpen(true)
+                        }}>
                         Continue
                       </AlertDialogAction>
                     </AlertDialogFooter>
