@@ -70,7 +70,7 @@ const SitePage: NextPage = () => {
   const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
     onSuccess: () => {
       setIsVerifySuccess(true);
-      if (setIsEditDialogOpen !== null) {
+      if (isEditDialogOpen !== null) {
         setIsEditDialogOpen(true);
       }
     },

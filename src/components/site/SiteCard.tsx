@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Inter } from "next/font/google";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Label } from "@/components/ui/Label"
+import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -56,24 +56,25 @@ const inter = Inter({ subsets: ["latin"] });
 export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState<boolean>(false);
-  const [isVerifySuccess, setIsVerifySuccess] = useState<boolean>(false);
+
+  const [isVerifySuccess, setIsVerifySuccess] = useState<boolean | null>(null);
 
   const { mutate: verify } = api.site.verifyEncryptionKey.useMutation({
-    onSuccess: () => {
-      setIsVerifySuccess(true);
+    onSuccess: async () => {
+      setIsVerifySuccess(true)
+      setTimeout(() => {}, 250)
     },
-
     onError: (error) => {
-      setIsVerifySuccess(false);
-      reset();
-
       toast({
         title: "permission denied",
         description: error.message,
-        variant: "destructive"
-      })
-    }
-  })
+        variant: "destructive",
+      });
+
+      setIsOpen(true);
+      resetDownload();
+    },
+  });
 
   const utils = api.useContext();
   const { mutate: deleteSite } = api.site.deleteSite.useMutation({
@@ -117,20 +118,24 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
   const { toast } = useToast();
 
   const onSubmit = (data: SiteActionFormData): void => {
-    verify({ siteId: site.id, encryptionKey: data.encryptionKey });
-
-    if (!isVerifySuccess) {
+    if (site.accounts.length < 1) {
+      setIsOpen(true);
+      deleteSite({ siteId: site.id });
       return;
     }
 
-    setIsVerifySuccess(false);
+    verify({ siteId: site.id, encryptionKey: data.encryptionKey });
+
+    if (isVerifySuccess === false) {
+      setIsVerifySuccess(false);
+      reset();
+      return;
+    }
 
     deleteSite({ siteId: site.id });
+    setIsVerifySuccess(null);
+    setIsOpen(false);
     reset();
-    toast({
-      title: "successfully deleted site",
-      description: "you have successfully deleted this site.",
-    });
   };
 
   // download
@@ -200,7 +205,18 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => setIsOpen(true)}>Continue</AlertDialogAction>
+                <AlertDialogAction
+                  onClick={() => {
+                    if (site.accounts.length === 0) {
+                      deleteSite({ siteId: site.id })
+                      setIsOpen(false);
+                    }
+
+                    setIsOpen(true);
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

@@ -168,26 +168,17 @@ export const siteRouter = createTRPCRouter({
         },
       });
 
-      if (!site) {
-        throw new TRPCError({ message: "site not found", code: "NOT_FOUND" });
-      }
-
-      const data = site.accounts.map((account) => {
+      site?.accounts.map((account) => {
         const decryptedPassword = decrypt(account.encryptedPassword, input.encryptionKey);
 
-        if (decryptedPassword.includes("�")) {
-          throw new TRPCError({
-            message: "invalid encryption key",
-            code: "BAD_REQUEST",
-          });
+        if (decryptedPassword.includes("�") || decryptedPassword.length < 1) {
+        throw new TRPCError({
+          message: "invalid encryption key",
+          code: "BAD_REQUEST",
+        });
         }
-
-        return {
-          ...account,
-          password: decryptedPassword,
-        };
       });
 
-      return data;
+      return true 
     }),
 });
