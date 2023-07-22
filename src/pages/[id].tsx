@@ -36,7 +36,7 @@ import {
 
 import { api } from "@/utils/api";
 
-import { ChevronLeft, Download, PlusSquare, Trash2 } from "lucide-react";
+import { ChevronLeft, Download, Loader2, PlusSquare, Trash2 } from "lucide-react";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 
 import { CreateAccount } from "@/components/account/CreateAccount";
@@ -50,10 +50,13 @@ import { type SiteActionFormData, SiteActionValidator } from "@/lib/validators/s
 
 import fileDownload from "js-file-download";
 import { EditSiteDialog } from "@/components/site/EditSiteDialog";
+import { useSession } from "next-auth/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const SitePage: NextPage = () => {
+  const { data: sessionData, status } = useSession();
+
   const router = useRouter();
   const routerRouter = useRouterRouter();
   const { id } = router.query;
@@ -148,6 +151,14 @@ const SitePage: NextPage = () => {
 
   const { toast } = useToast();
 
+  const {
+    data: siteData,
+    isLoading,
+    error,
+  } = api.site.getSite.useQuery({
+    siteId: id as string,
+  });
+
   // deletion
   const onSubmit = (data: SiteActionFormData): void => {
     if (siteData!.accounts.length < 1) {
@@ -193,16 +204,24 @@ const SitePage: NextPage = () => {
     resetEdit();
   };
 
-  const {
-    data: siteData,
-    isLoading,
-    error,
-  } = api.site.getSite.useQuery({
-    siteId: id as string,
-  });
-
   if (error?.data?.code === "NOT_FOUND") {
     routerRouter.push("/404");
+  }
+
+  if (!sessionData && status !== "loading") {
+    routerRouter.push("/auth/sign-in")
+  }
+
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="flex justify-center p-[25%]">
+        <Loader2 className="animate-spin" /> 
+      </div>
+    )
+  }
+
+  if (sessionData?.user.id !== siteData!.userId) {
+    routerRouter.push("/")
   }
 
   return (
