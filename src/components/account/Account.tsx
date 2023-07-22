@@ -2,7 +2,7 @@ import type { SiteAccount } from "@prisma/client";
 import React, { useState } from "react";
 import { HoverIconButton } from "../HoverIconButton";
 import { LockClosedIcon, LockOpen1Icon, Pencil2Icon } from "@radix-ui/react-icons";
-import { Copy, EyeIcon, EyeOff, Trash2 } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 import { decrypt, displayEmail } from "@/lib/utils";
 import {
   Dialog,
