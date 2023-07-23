@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Stats } from "@/components/dashboard/Stats";
+import { CommandMenu } from "./command-menu/CommandMenu";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,6 +23,12 @@ export const Navbar = ({}) => {
           <h1 className="text-2xl font-extrabold text-purple-200">warlock.</h1>
         </Link>
       </div>
+      {session && (
+      <div className="flex justify-start ml-24">
+        {/* render commandmenu */}
+        <CommandMenu />
+      </div>
+      )}
       <div className="flex items-center">
         {session ? (
           <div className="grid grid-cols-2">
