@@ -58,7 +58,7 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
 
             <div className="pt-3">
               <Label>encryption key</Label>
-              <Input {...register("encryptionKey")} />
+              <Input {...register("encryptionKey")} type="password" />
               {errors.encryptionKey && (
                 <p className="pt-2 text-xs font-bold text-red-500">
                   {errors.encryptionKey.message}

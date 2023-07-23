@@ -8,6 +8,7 @@ import { Avatar, AvatarImage } from "./ui/Avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/Popover";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Stats } from "@/components/dashboard/Stats";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,12 +28,20 @@ export const Navbar = ({}) => {
             <Popover>
               <PopoverTrigger>
                 <Avatar>
-                  <AvatarImage src={session.user.image as string} alt={session.user.name as string} />
+                  <AvatarImage
+                    src={session.user.image as string}
+                    alt={session.user.name as string}
+                  />
                 </Avatar>
               </PopoverTrigger>
 
               <PopoverContent className={cn(inter.className, "text-sm")}>
-                Logged in as: <p className="font-bold text-purple-300">{session.user.email as string}</p>
+                Logged in as:{" "}
+                <p className="font-bold text-purple-300">{session.user.email as string}</p>
+                <div className="pt-5">
+                  my stats:
+                  <Stats />
+                </div>
               </PopoverContent>
             </Popover>
 

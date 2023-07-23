@@ -94,25 +94,15 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
 
   return (
     <div className="grid grid-cols-4 gap-4 rounded-lg px-20 py-4 hover:bg-gray-900">
-      <p className="text-md pt-1 font-bold text-purple-300">{email}</p>
+      <p className="text-md pt-1 font-bold text-purple-300 pr-20 flex justify-center">{email}</p>
       <p className="flex justify-center pt-1">{password}</p>
-      {account.createdAt !== account.updatedAt ? (
-        <p className="pt-1 text-gray-500">
+        <p className="pt-1 text-gray-500 flex justify-center">
           created on{" "}
           {new Date(account.createdAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
           })}
         </p>
-      ) : (
-        <p className="pt-1 text-gray-500">
-          modified on{" "}
-          {new Date(account.updatedAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-          })}
-        </p>
-      )}
 
       <div className="grid grid-cols-3 gap-1">
         {!isVisible ? (

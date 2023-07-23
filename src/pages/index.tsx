@@ -17,7 +17,7 @@ export default function Home() {
       </div>
       {sessionData?.user ? (
         <div className="flex justify-start pl-16">
-          <Dashboard userId={sessionData.user.id} />
+          <Dashboard user={sessionData.user} />
         </div>
       ) : (
         <p>landing page goes here</p>
