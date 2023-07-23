@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
@@ -10,12 +10,13 @@ import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
 import { Button } from "../ui/Button";
 import { api } from "@/utils/api";
+import { EyeIcon, EyeOff } from "lucide-react";
 
 interface CreateSiteFormProps {
   userId: string;
 }
 
-export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
+export const CreateSiteForm: React.FC<CreateSiteFormProps> = () => {
   const router = useRouter();
 
   const { mutate: createSite, isLoading } = api.site.createSite.useMutation({
@@ -23,6 +24,8 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
       router.push(`/${data.id}`);
     },
   });
+
+  const [inputType, setInputType] = useState<"text" | "password">("password");
 
   const {
     register,
@@ -58,7 +61,32 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
 
             <div className="pt-3">
               <Label>encryption key</Label>
-              <Input {...register("encryptionKey")} type="password" />
+              <div className="grid auto-cols-max grid-flow-col gap-x-4">
+                <div>
+                  <Input {...register("encryptionKey")} type={inputType} className="w-[200%]" />
+                </div>
+                <div className="flex justify-center pl-[600%]">
+                  <Button size="icon" variant="link">
+                    {inputType === "password" ? (
+                      <EyeIcon
+                        className="h-4 w-4"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setInputType("text");
+                        }}
+                      />
+                    ) : (
+                      <EyeOff
+                        className="h-4 w-4"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setInputType("password");
+                        }}
+                      />
+                    )}
+                  </Button>
+                </div>
+              </div>
               {errors.encryptionKey && (
                 <p className="pt-2 text-xs font-bold text-red-500">
                   {errors.encryptionKey.message}
@@ -78,9 +106,7 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = ({ userId }) => {
                 placeholder="eg: my chemistry teacher's name + my cat's birthday"
               />
               {errors.encryptionKeyHint && (
-                <p className="pt-2 text-xs text-red-500">
-                  {errors.encryptionKeyHint.message}
-                </p>
+                <p className="pt-2 text-xs text-red-500">{errors.encryptionKeyHint.message}</p>
               )}
               <p className="pt-2 text-xs text-gray-500">
                 this hint will be shown to you if you forget your encryption key, please configure a

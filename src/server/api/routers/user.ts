@@ -11,9 +11,14 @@ export const userRouter = createTRPCRouter({
       where: {
         userId: ctx.session.user.id,
       },
+      select: {
+        accounts: true 
+      }
     });
 
-    const accountsLen: number = accounts.length;
+    const accountsLen: number = accounts.reduce((acc, site) => {
+      return acc + site.accounts.length;
+    }, 0);
 
     return {
       sitesCount: sites,
