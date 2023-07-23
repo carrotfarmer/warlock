@@ -1,27 +1,27 @@
-import Head from "next/head";
+import { useSession } from "next-auth/react";
+
 import { Navbar } from "@/components/Navbar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
-import { useSession } from "next-auth/react";
+import { PageHead } from "@/components/PageHead";
 
 export default function Home() {
   const { data: sessionData } = useSession();
 
   return (
-    <div>
-      <Head>
-        <title>warlock</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className="flex justify-center">
-        <Navbar />
-      </div>
-      {sessionData?.user ? (
-        <div className="flex justify-start pl-16">
-          <Dashboard user={sessionData.user} />
+    <>
+      <PageHead title="warlock" description="secure password management for everyone" />
+      <div>
+        <div className="flex justify-center">
+          <Navbar />
         </div>
-      ) : (
-        <p>landing page goes here</p>
-      )}
-    </div>
+        {sessionData?.user ? (
+          <div className="flex justify-start pl-16">
+            <Dashboard user={sessionData.user} />
+          </div>
+        ) : (
+          <p>landing page goes here</p>
+        )}
+      </div>
+    </>
   );
 }

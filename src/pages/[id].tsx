@@ -51,6 +51,7 @@ import { type SiteActionFormData, SiteActionValidator } from "@/lib/validators/s
 import fileDownload from "js-file-download";
 import { EditSiteDialog } from "@/components/site/EditSiteDialog";
 import { useSession } from "next-auth/react";
+import { PageHead } from "@/components/PageHead";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -226,6 +227,7 @@ const SitePage: NextPage = () => {
 
   return (
     <>
+      <PageHead title={`${siteData!.name} - warlock`} />
       <Navbar />
       <main>
         {isLoading ? (
@@ -336,6 +338,7 @@ const SitePage: NextPage = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      {/* eslint-disable-next-line */}
                       <AlertDialogAction onClick={async () => {
                           if (siteData!.accounts.length < 1) {
                             deleteSite({ siteId: siteData!.id }) 

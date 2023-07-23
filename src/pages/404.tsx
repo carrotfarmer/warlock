@@ -1,15 +1,14 @@
-import { Title } from "@/components/Title";
-import { XOctagon } from "lucide-react";
 import type { NextPage } from "next";
-import Head from "next/head";
+
+import { PageHead } from "@/components/PageHead";
+import { Title } from "@/components/Title";
+
+import { XOctagon } from "lucide-react";
 
 const NotFound: NextPage = () => {
   return (
     <>
-      <Head>
-        <title>404 not found - warlock</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <PageHead title="404 page not found - warlock" />
       <div className="flex h-full w-full flex-col items-center justify-center pt-[15%]">
         <XOctagon className="h-20 w-20 text-red-300" />
         <Title>404 not found</Title>

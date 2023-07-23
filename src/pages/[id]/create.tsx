@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/Navbar";
+import { PageHead } from "@/components/PageHead";
 import { Title } from "@/components/Title";
 import { CreateAccountForm } from "@/components/account/CreateAccountForm";
 import { Button } from "@/components/ui/Button";
@@ -28,6 +29,7 @@ const CreateSiteAccount: NextPage = () => {
 
   return (
     <>
+      <PageHead title={`create account in ${siteData!.name} - warlock`} />
       <Navbar />
 
       <main className="pt-5">
