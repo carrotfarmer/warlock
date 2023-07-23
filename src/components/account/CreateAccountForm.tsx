@@ -3,21 +3,44 @@ import { useRouter } from "next/navigation";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { type AccountFormData, AccountValidator } from "@/lib/validators/account";
 
 import { Card, CardContent } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { Label } from "../ui/Label";
 import { Button } from "../ui/Button";
-import { api } from "@/utils/api";
-import { type AccountFormData, AccountValidator } from "@/lib/validators/account";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
+
 import { EncryptionKeyHint } from "../site/EncryptionKeyHint";
 
-import { encrypt } from "@/lib/utils";
+import { api } from "@/utils/api";
+import { encrypt, genPassword } from "@/lib/utils";
+
 import { EyeIcon, EyeOff } from "lucide-react";
+import { Inter } from "next/font/google";
+import { Slider } from "../ui/Slider";
+import { Separator } from "../ui/Separator";
+import { z } from "zod";
+
+const inter = Inter({ subsets: ["latin"] });
 
 interface CreateAccountFormProps {
   siteId: string;
 }
+
+const genPwdSchema = z.object({
+  passwordLen: z.number().min(10).max(50),
+});
+
+type GenPasswordFormData = z.infer<typeof genPwdSchema>;
 
 export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) => {
   const router = useRouter();
@@ -26,6 +49,13 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
 
   // for encryption key
   const [ekInputType, setEkInputType] = useState<"text" | "password">("password");
+
+  // password generator modal
+  const [isPwdOpen, setIsPwdOpen] = useState<boolean>(false);
+
+  const [passwordLen, setPasswordLen] = useState<number>(12);
+
+  const [generatedPassword, setGeneratedPassword] = useState<string>(genPassword(passwordLen));
 
   const { mutate: createAccount, isLoading } = api.account.createAccount.useMutation({
     onSuccess: () => {
@@ -38,8 +68,22 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<AccountFormData>({
     resolver: zodResolver(AccountValidator),
+  });
+
+  const {
+    register: registerPwdGen,
+    handleSubmit: pwdGenHandleSubmit,
+    formState: { errors: errorsPwdGen },
+    reset: resetPwdGen,
+    getValues
+  } = useForm<GenPasswordFormData>({
+    resolver: zodResolver(genPwdSchema),
+    defaultValues: {
+      passwordLen: 12
+    }
   });
 
   const onSubmit = (data: AccountFormData) => {
@@ -47,6 +91,13 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
 
     createAccount({ siteId, encryptedPassword, email: data.email });
     reset();
+  };
+
+  const onPwdGenSubmit = () => {
+    // alert("hey")
+    setValue("password", generatedPassword);
+    resetPwdGen();
+    setIsPwdOpen(false);
   };
 
   return (
@@ -86,6 +137,84 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
               <p className="pt-2 text-xs text-gray-500">
                 this password will be encrypted using this site&apos;s encryption key.
               </p>
+
+              <p className="pt-2 text-xs text-gray-500">
+                don&apos;t have a password?
+                <Button variant="link" size="sm" onClick={() => setIsPwdOpen(true)}>
+                  generate one
+                </Button>
+              </p>
+
+              <Dialog open={isPwdOpen} onOpenChange={setIsPwdOpen}>
+                <DialogContent className={inter.className}>
+                  {/* eslint-disable-next-line */}
+                  <form onSubmit={pwdGenHandleSubmit(onPwdGenSubmit)}>
+                    <DialogHeader>
+                      <DialogTitle>password generator</DialogTitle>
+                      <DialogDescription>
+                        this will help you generate a secure password which can be stored in this
+                        site.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="pt-3">
+                      <Label>password length</Label>
+                      {/* render number input and slider for password length */}
+                      <div className="flex flex-row gap-x-4 pt-2">
+                        <Input
+                          type="number"
+                          className="w-20"
+                          value={Number(passwordLen)}
+                          {...registerPwdGen("passwordLen", { valueAsNumber: true })}
+                        />
+                        <Slider
+                          className="w-xl"
+                          defaultValue={[12]}
+                          min={10}
+                          max={50}
+                          step={1}
+                          onValueChange={(e) => {
+                            // eslint-disable-next-line
+                            // @ts-ignore
+                            setPasswordLen(Number(e[0]));
+                            setGeneratedPassword(genPassword(passwordLen));
+                          }}
+                        />
+                      </div>
+                        {errorsPwdGen.passwordLen && (
+                        <div className="pt-1 text-xs text-red-500">
+                          {errorsPwdGen.passwordLen.message}
+                        </div>
+                        )}
+                      <div className="pt-2">
+                        <Label>generated password</Label>
+                      </div>
+                      <div className="pt-1">
+                        <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+                          {generatedPassword}
+                        </code>
+                      </div>
+                    </div>
+                    <div className="py-4">
+                      <Separator />
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setIsPwdOpen(false);
+                        }}
+                      >
+                        close
+                      </Button>
+
+                      <Button variant="default" type="submit">
+                        use password
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="pt-3">
