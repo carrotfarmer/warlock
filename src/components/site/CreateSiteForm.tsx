@@ -11,6 +11,7 @@ import { Label } from "../ui/Label";
 import { Button } from "../ui/Button";
 import { api } from "@/utils/api";
 import { EyeIcon, EyeOff } from "lucide-react";
+import { Textarea } from "../ui/Textarea";
 
 interface CreateSiteFormProps {
   userId: string;
@@ -101,7 +102,7 @@ export const CreateSiteForm: React.FC<CreateSiteFormProps> = () => {
 
             <div className="pt-3">
               <Label>encryption key hint</Label>
-              <Input
+              <Textarea
                 {...register("encryptionKeyHint")}
                 placeholder="eg: my chemistry teacher's name + my cat's birthday"
               />
