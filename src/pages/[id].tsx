@@ -262,7 +262,7 @@ const SitePage: NextPage = () => {
                         <DialogTitle>enter encryption key</DialogTitle>
                         <DialogDescription>
                           <p className="pb-5">
-                            enter this site&apos;s encryption key to view the credentials. if you do
+                            enter this site&apos;s encryption key to download the credentials. if you do
                             not remember the encryption key you can use the hint given below.
                           </p>
 

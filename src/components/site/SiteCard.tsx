@@ -232,7 +232,7 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site }) => {
                   <DialogTitle>enter encryption key</DialogTitle>
                   <DialogDescription>
                     <p className="pb-5">
-                      enter this site&apos;s encryption key to view the credentials. if you do not
+                      enter this site&apos;s encryption key to delete the credentials. if you do not
                       remember the encryption key you can use the hint given below.
                     </p>
                     <Label>encryption key</Label>
