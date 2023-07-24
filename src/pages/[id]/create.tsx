@@ -29,7 +29,11 @@ const CreateSiteAccount: NextPage = () => {
 
   return (
     <>
-      <PageHead title={`create account in ${siteData!.name} - warlock`} />
+      {siteData ? (
+        <PageHead title={`create account in ${siteData.name}`} />
+      ) : (
+        <PageHead title="create account" />
+      )}
       <Navbar />
 
       <main className="pt-5">
