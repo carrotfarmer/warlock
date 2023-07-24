@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/Command";
 
 import type { ExtendedSite } from "@/lib/types";
-import { HomeIcon, KeyIcon, SearchIcon } from "lucide-react";
+import { HomeIcon, KeyIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation"
 import { api } from "@/utils/api";
@@ -74,6 +74,10 @@ export const CommandMenu: React.FC<CommandMenuProps> = ({}) => {
               <CommandItem onSelect={() => router.push("/")}>
                 <HomeIcon className="mr-2 h-4 w-4" />
                 <span>Home</span>
+              </CommandItem>
+              <CommandItem onSelect={() => router.push("/create")}>
+                <PlusIcon className="mr-2 h-4 w-4" />
+                <span>Create a Site</span>
               </CommandItem>
               <CommandItem onSelect={() => void signOut()}>
                 <ExitIcon className="mr-2 h-4 w-4" />
