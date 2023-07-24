@@ -172,37 +172,13 @@ export const siteRouter = createTRPCRouter({
         const decryptedPassword = decrypt(account.encryptedPassword, input.encryptionKey);
 
         if (decryptedPassword.includes("�") || decryptedPassword.length < 1) {
-        throw new TRPCError({
-          message: "invalid encryption key",
-          code: "BAD_REQUEST",
-        });
+          throw new TRPCError({
+            message: "invalid encryption key",
+            code: "BAD_REQUEST",
+          });
         }
       });
 
-      return true 
+      return true;
     }),
-
-  search: protectedProcedure
-  .input(
-    z.object({
-      searchQuery: z.string(),
-    })
-  )
-  .query(async ({ ctx, input }) => {
-    const sites = await ctx.prisma.site.findMany({
-      where: {
-        userId: ctx.session.user.id,
-        name: {
-          startsWith: input.searchQuery,
-          mode: "insensitive",
-        },
-      },
-      include: {
-        user: true,
-        accounts: true,
-      },
-    });
-
-    return sites;
-  }),
 });

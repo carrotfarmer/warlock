@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export const LandingPage: React.FC = ({}) => {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
     <div className="pt-3">
@@ -48,10 +48,9 @@ export const LandingPage: React.FC = ({}) => {
           <p className="text-xl font-extrabold text-gray-300">
             check out the{" "}
             <span className="text-purple-400 underline underline-offset-4">
-              <Link href="https://github.com/carrotfarmer/warlock">
-                source code
-              </Link>
-            </span>.
+              <Link href="https://github.com/carrotfarmer/warlock">source code</Link>
+            </span>
+            .
           </p>
           <p className="pt-8 text-xl text-gray-400">still don&apos;t believe us?</p>
           <p className="text-xl font-extrabold text-gray-300">
@@ -59,15 +58,19 @@ export const LandingPage: React.FC = ({}) => {
             your sites onto your local computer.
           </p>
           <p className="pt-8 text-xl text-gray-400">ready to get started?</p>
-          <p className="text-gray-600 text-xs py-2">
+          <p className="py-2 text-xs text-gray-600">
             don&apos;t worry, google won&apos;t store your password either.
           </p>
           <div className="flex justify-center pb-36">
-          <Button variant="outline" type="button" size="lg" onClick={() => router.push("/auth/sign-up")}>
-            sign up with <Icons.google className="ml-2 mr-2 h-4 w-4" /> google
-          </Button>
+            <Button
+              variant="outline"
+              type="button"
+              size="lg"
+              onClick={() => router.push("/auth/sign-up")}
+            >
+              sign up with <Icons.google className="ml-2 mr-2 h-4 w-4" /> google
+            </Button>
           </div>
-
         </div>
       </div>
     </div>
