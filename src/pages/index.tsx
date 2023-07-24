@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react";
 import { Navbar } from "@/components/Navbar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { PageHead } from "@/components/PageHead";
+import { LandingPage } from "@/components/landing-page/LandingPage";
 
 export default function Home() {
   const { data: sessionData } = useSession();
@@ -19,7 +20,7 @@ export default function Home() {
             <Dashboard user={sessionData.user} />
           </div>
         ) : (
-          <p>landing page goes here</p>
+          <LandingPage />
         )}
       </div>
     </>

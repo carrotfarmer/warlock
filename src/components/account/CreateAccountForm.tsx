@@ -78,12 +78,11 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
     handleSubmit: pwdGenHandleSubmit,
     formState: { errors: errorsPwdGen },
     reset: resetPwdGen,
-    getValues
   } = useForm<GenPasswordFormData>({
     resolver: zodResolver(genPwdSchema),
     defaultValues: {
-      passwordLen: 12
-    }
+      passwordLen: 12,
+    },
   });
 
   const onSubmit = (data: AccountFormData) => {
@@ -124,9 +123,21 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
                 <div className="flex justify-center pl-[600%]">
                   <Button size="icon" variant="link" className="flex justify-center pt-10">
                     {inputType === "password" ? (
-                      <EyeIcon className="h-4 w-4" onClick={() => setInputType("text")} />
+                      <EyeIcon
+                        className="h-4 w-4"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setInputType("text");
+                        }}
+                      />
                     ) : (
-                      <EyeOff className="h-4 w-4" onClick={() => setInputType("password")} />
+                      <EyeOff
+                        className="h-4 w-4"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setInputType("password");
+                        }}
+                      />
                     )}
                   </Button>
                 </div>
@@ -181,11 +192,11 @@ export const CreateAccountForm: React.FC<CreateAccountFormProps> = ({ siteId }) 
                           }}
                         />
                       </div>
-                        {errorsPwdGen.passwordLen && (
+                      {errorsPwdGen.passwordLen && (
                         <div className="pt-1 text-xs text-red-500">
                           {errorsPwdGen.passwordLen.message}
                         </div>
-                        )}
+                      )}
                       <div className="pt-2">
                         <Label>generated password</Label>
                       </div>
