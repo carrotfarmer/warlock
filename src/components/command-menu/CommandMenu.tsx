@@ -1,11 +1,6 @@
 import * as React from "react";
 import {
-  CalendarIcon,
-  EnvelopeClosedIcon,
   ExitIcon,
-  FaceIcon,
-  GearIcon,
-  PersonIcon,
   RocketIcon,
 } from "@radix-ui/react-icons";
 
@@ -17,21 +12,18 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/Command";
 
 import type { ExtendedSite } from "@/lib/types";
-import { HomeIcon, KeyIcon, PlusIcon, SearchIcon } from "lucide-react";
+import { HomeIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation"
 import { api } from "@/utils/api";
 import { signOut } from "next-auth/react";
 
-interface CommandMenuProps {}
-
 const inter = Inter({ subsets: ["latin"] })
 
-export const CommandMenu: React.FC<CommandMenuProps> = ({}) => {
+export const CommandMenu: React.FC = ({}) => {
   const [open, setOpen] = React.useState(false);
 
   const router = useRouter();
