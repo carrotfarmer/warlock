@@ -2,7 +2,7 @@ import type { SiteAccount } from "@prisma/client";
 import React, { useState } from "react";
 import { HoverIconButton } from "../HoverIconButton";
 import { LockClosedIcon, LockOpen1Icon, Pencil2Icon } from "@radix-ui/react-icons";
-import { Copy, Trash2 } from "lucide-react";
+import { Copy, EyeIcon, EyeOff, Trash2 } from "lucide-react";
 import { decrypt, displayEmail } from "@/lib/utils";
 import {
   Dialog,
@@ -46,6 +46,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
   const [email, setEmail] = useState<string>(displayEmail(account.email));
   const [password, setPassword] = useState<string>("*************");
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [isPwdVisible, setIsPwdVisible] = useState<boolean>(false);
 
   // unlock dialog
   const [open, setIsOpen] = useState<boolean>(false);
@@ -95,7 +96,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
   return (
     <div className="grid grid-cols-4 gap-4 rounded-lg px-20 py-4 hover:bg-gray-900">
       <p className="text-md pt-1 font-bold text-purple-300 pr-20 flex justify-center">{email}</p>
-      <p className="flex justify-center pt-1">{password}</p>
+      <p className="flex justify-center pt-1">{isPwdVisible ? password : "*************"}</p>
         <p className="pt-1 text-gray-500 flex justify-center">
           created on{" "}
           {new Date(account.createdAt).toLocaleDateString("en-US", {
@@ -151,20 +152,7 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
         )}
 
         {isVisible && (
-          <div className="grid grid-cols-3 gap-12">
-            <HoverIconButton tooltipText="edit password" onClick={() => setIsEditOpen(true)}>
-              <Pencil2Icon className="h-4 w-4" />
-            </HoverIconButton>
-
-            <EditAccountDialog
-              isOpen={isEditOpen}
-              setIsOpen={setIsEditOpen}
-              decryptedPassword={password}
-              account={account}
-              setIsVisible={setIsVisible}
-              setPassword={setPassword}
-            />
-
+          <div className="grid grid-cols-4 gap-12 pr-10">
             <HoverIconButton
               tooltipText="copy password"
               // eslint-disable-next-line
@@ -182,6 +170,24 @@ export const Account: React.FC<AccountProps> = ({ account }) => {
             >
               <Copy className="h-4 w-4" />
             </HoverIconButton>
+
+            <HoverIconButton tooltipText="view password" onClick={() => setIsPwdVisible(!isPwdVisible)}>
+              {isPwdVisible ? <EyeOff className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+            </HoverIconButton>
+
+            <HoverIconButton tooltipText="edit password" onClick={() => setIsEditOpen(true)}>
+              <Pencil2Icon className="h-4 w-4" />
+            </HoverIconButton>
+
+            <EditAccountDialog
+              isOpen={isEditOpen}
+              setIsOpen={setIsEditOpen}
+              decryptedPassword={password}
+              account={account}
+              setIsVisible={setIsVisible}
+              setPassword={setPassword}
+            />
+
             <HoverIconButton
               tooltipText="delete credentials"
               // eslint-disable-next-line
